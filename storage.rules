@@ -1,0 +1,25 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Deny access to any file outside user folders
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // User-specific private photo storage path
+    // Path: /users/{userId}/photos/{fileName}
+    match /users/{userId}/photos/{fileName} {
+      // Only the authenticated owner can read their photo
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // Only the authenticated owner can upload photos to their own folder
+      // Enforce image content-type and reasonable file constraints
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId
+                   && request.resource.contentType.matches('image/.*');
+
+      // Only the authenticated owner can delete their photo
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

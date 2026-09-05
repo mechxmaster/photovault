@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Deny all root level and unspecified access by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Strict User-Isolated Private Photos Collection
+    // Schema path: /users/{userId}/photos/{photoId}
+    match /users/{userId}/photos/{photoId} {
+      // User can only read their own photos
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // User can only create photos for themselves and must match their own UID
+      allow create: if request.auth != null 
+                    && request.auth.uid == userId 
+                    && request.resource.data.uid == userId
+                    && request.resource.data.storagePath is string
+                    && request.resource.data.downloadURL is string;
+
+      // User can only update their own photo metadata
+      allow update: if request.auth != null 
+                    && request.auth.uid == userId 
+                    && request.resource.data.uid == userId;
+
+      // User can only delete their own photos
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
