@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>PhotoVault — Cloud Photo Storage</title>
+  <meta name="description"
+    content="Secure cloud photo storage powered by Firebase Authentication, Cloud Firestore, and Firebase Storage.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <script type="module" crossorigin src="/photovault/assets/index-CT3oHtza.js"></script>
+  <link rel="stylesheet" crossorigin href="/photovault/assets/index-BF4TTIyC.css">
+</head>
+
+<body>
+  <div id="app">
+    <!-- Main Top Navigation -->
+    <header class="top-nav">
+      <div class="nav-brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="4" ry="4" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <path d="m21 15-5-5L5 21" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">PhotoVault</span>
+          <span class="brand-subtitle">Cloud Storage</span>
+        </div>
+      </div>
+
+      <div class="nav-controls">
+        <!-- User Profile (Authenticated) -->
+        <div id="user-nav-section" class="user-nav hidden">
+          <div class="user-profile-chip">
+            <div class="user-avatar" id="nav-user-avatar">U</div>
+            <div class="user-info">
+              <span class="user-email" id="nav-user-name">User Name</span>
+              <span class="user-uid-snippet" id="nav-user-uid">UID: ...</span>
+            </div>
+          </div>
+          <button id="btn-logout" class="btn btn-secondary btn-sm" title="Log out of your account">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" x2="9" y1="12" y2="12" />
+            </svg>
+            <span>Log out</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- AUTHENTICATION VIEW (When Logged Out) -->
+      <section id="auth-section" class="auth-wrapper">
+        <div class="auth-card">
+          <div class="auth-header">
+            <div class="auth-hero-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <h1 class="auth-title">Photo Vault</h1>
+            <p class="auth-desc">Enter your unique username to access your photos. The same unique username syncs your photos across any Google Chrome browser, phone, or computer.</p>
+          </div>
+
+          <!-- Auth Form -->
+          <form id="auth-form" class="auth-form">
+            <div class="form-group">
+              <label for="auth-username">Unique Username</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                <input type="text" id="auth-username" required placeholder="Enter unique username (e.g. manasi)" autocomplete="username" minlength="2">
+              </div>
+            </div>
+
+            <div id="auth-error-box" class="alert-box error hidden" role="alert"></div>
+
+            <button type="submit" id="btn-auth-submit" class="btn btn-primary btn-block">
+              <span id="auth-submit-label">Enter Vault</span>
+              <div id="auth-submit-spinner" class="spinner hidden"></div>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- DASHBOARD VIEW (When Authenticated) -->
+      <section id="dashboard-section" class="dashboard-wrapper hidden">
+
+        <!-- Upload Dropzone Area -->
+        <div class="upload-container">
+          <div id="dropzone" class="dropzone-box" tabindex="0" role="button" aria-label="Dropzone for photo uploads">
+            <input type="file" id="file-input" multiple accept="image/jpeg,image/png,image/webp,image/gif"
+              class="hidden-file-input">
+            <div class="dropzone-content">
+              <div class="dropzone-icon-bubble">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                  <path d="M12 12v9" />
+                  <path d="m16 16-4-4-4 4" />
+                </svg>
+              </div>
+              <div class="dropzone-text">
+                <p class="primary-text">Drag & drop your photos here, or <span class="browse-link">browse files</span>
+                </p>
+                <p class="secondary-text">Supports multiple files in JPG, PNG, WEBP, and GIF</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Uploads Progress Bar Queue -->
+          <div id="upload-queue" class="upload-queue hidden">
+            <div class="queue-header">
+              <div class="queue-title">
+                <span class="queue-spinner"></span>
+                <span>Uploading <strong id="queue-count">0</strong> photos...</span>
+              </div>
+              <span id="queue-total-percent" class="queue-percent">0%</span>
+            </div>
+            <div class="progress-track">
+              <div id="queue-overall-bar" class="progress-fill" style="width: 0%;"></div>
+            </div>
+            <div id="upload-items-list" class="upload-items-list"></div>
+          </div>
+        </div>
+
+        <!-- Gallery Controls Toolbar -->
+        <div class="gallery-toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <input type="text" id="gallery-search" placeholder="Search photos by filename..." autocomplete="off">
+              <button id="btn-clear-search" class="clear-search-btn hidden" title="Clear search">✕</button>
+            </div>
+
+            <div class="sort-selector">
+              <label for="sort-select">Sort by:</label>
+              <select id="sort-select" class="custom-select">
+                <option value="newest" selected>Newest Upload</option>
+                <option value="oldest">Oldest Upload</option>
+                <option value="name-asc">Name (A → Z)</option>
+                <option value="name-desc">Name (Z → A)</option>
+                <option value="size-desc">Size (Largest)</option>
+                <option value="size-asc">Size (Smallest)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="toolbar-right">
+            <!-- Multi-Selection & Bulk Actions -->
+            <div class="selection-actions">
+              <label class="select-all-label">
+                <input type="checkbox" id="checkbox-select-all" class="custom-checkbox">
+                <span>Select All</span>
+              </label>
+              <button id="btn-bulk-delete" class="btn btn-danger btn-sm hidden">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
+                <span>Delete Selected (<span id="selected-count">0</span>)</span>
+              </button>
+            </div>
+
+            <div class="gallery-stats">
+              <span id="gallery-count-badge" class="badge">0 photos</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gallery Grid Container -->
+        <div id="gallery-grid" class="gallery-grid" role="region" aria-label="Photo Gallery">
+          <!-- Dynamically populated photo cards -->
+        </div>
+
+        <!-- Empty Gallery State -->
+        <div id="gallery-empty-state" class="empty-state hidden">
+          <div class="empty-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="4" ry="4" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="m21 15-5-5L5 21" />
+            </svg>
+          </div>
+          <h3 class="empty-title">No photos yet</h3>
+          <p class="empty-desc">Your vault is currently empty. Drag & drop images above or click browse to
+            upload your first photos.</p>
+          <button id="btn-empty-upload" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span>Upload Photos</span>
+          </button>
+        </div>
+
+        <!-- No Search Results State -->
+        <div id="gallery-no-results" class="empty-state hidden">
+          <div class="empty-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+          </div>
+          <h3 class="empty-title">No matching photos found</h3>
+          <p class="empty-desc">Try searching for a different keyword or filename.</p>
+          <button id="btn-reset-search" class="btn btn-secondary btn-sm">Reset Search</button>
+        </div>
+
+        <!-- Loading Skeleton / Spinner State -->
+        <div id="gallery-loading" class="gallery-loading">
+          <div class="loading-spinner"></div>
+          <p>Loading your vault...</p>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- LIGHTBOX / FULLSCREEN PREVIEW MODAL -->
+    <div id="lightbox-modal" class="modal lightbox-modal hidden" role="dialog" aria-modal="true"
+      aria-label="Photo Preview">
+      <div class="lightbox-overlay" id="lightbox-backdrop"></div>
+      <div class="lightbox-dialog">
+        <!-- Lightbox Header -->
+        <div class="lightbox-top-bar">
+          <div class="lightbox-filename" id="lightbox-filename">photo.jpg</div>
+          <div class="lightbox-actions">
+            <a id="btn-lightbox-download" class="btn btn-icon" download target="_blank" title="Download original photo">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" x2="12" y1="15" y2="3" />
+              </svg>
+            </a>
+            <button id="btn-lightbox-delete" class="btn btn-icon btn-danger-icon" title="Delete this photo">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+              </svg>
+            </button>
+            <button id="btn-lightbox-close" class="btn btn-icon btn-close" title="Close (Esc)">✕</button>
+          </div>
+        </div>
+
+        <!-- Lightbox Main Stage -->
+        <div class="lightbox-stage">
+          <button id="btn-lightbox-prev" class="lightbox-nav-btn prev" title="Previous photo (Left Arrow)">‹</button>
+          <div class="lightbox-image-container">
+            <img id="lightbox-img" src="" alt="Preview">
+          </div>
+          <button id="btn-lightbox-next" class="lightbox-nav-btn next" title="Next photo (Right Arrow)">›</button>
+        </div>
+
+        <!-- Lightbox Footer / Metadata Bar -->
+        <div class="lightbox-footer">
+          <div class="meta-item">
+            <span class="meta-label">Uploaded:</span>
+            <span class="meta-value" id="lightbox-meta-date">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">File Size:</span>
+            <span class="meta-value" id="lightbox-meta-size">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Type:</span>
+            <span class="meta-value" id="lightbox-meta-type">—</span>
+          </div>
+          <div class="meta-item meta-storage-path">
+            <span class="meta-label">Firebase Path:</span>
+            <code class="meta-value" id="lightbox-meta-path">—</code>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIRMATION MODAL -->
+    <div id="confirm-modal" class="modal confirm-modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-backdrop" id="confirm-backdrop"></div>
+      <div class="modal-card">
+        <div class="confirm-icon danger">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </div>
+        <h3 id="confirm-title" class="confirm-title">Delete Photo?</h3>
+        <p id="confirm-message" class="confirm-message">Are you sure you want to delete this photo? This will
+          permanently remove the image from Firebase Storage and its Firestore metadata.</p>
+        <div class="modal-buttons">
+          <button id="btn-confirm-cancel" class="btn btn-secondary">Cancel</button>
+          <button id="btn-confirm-ok" class="btn btn-danger">Delete Permanently</button>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  </div>
+
+</body>
+
+</html>
